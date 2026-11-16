@@ -1,6 +1,15 @@
 # Fútbol Aula — aplicación Android Kotlin
 
-## Qué contiene este ZIP
+## Estado de esta entrega
+Los 16 ejercicios evaluables (E01–E16) están resueltos en `app/src/main/java/es/aula/futbol/evaluables/`, sin cambiar firmas ni IDs.
+- Resultado local: `./gradlew testDebugUnitTest` ejecuta 67 tests sin fallos (64 de la base más 3 de la ampliación de E16) y `./gradlew assembleDebug` compila.
+- Entrega: `entrega/Entrega_FutbolAula.pdf` reúne las capturas, cinco líneas por ejercicio y el código. El resumen con el detalle está en `docs/ENTREGA.md`.
+- Corrección en la base: al importar una imagen, `inSampleSize` empezaba en 0 y la división posterior lanzaba "divide by zero"; ahora se inicializa en 1 en `MainActivity.kt`.
+- Ampliación propia de E16: `E16Panel.summary` muestra el club más representado entre los favoritos. Queda pendiente de acordar con el docente.
+- No se han ejecutado: las pruebas instrumentadas, el sensor de agitar (E05), el intercambio Bluetooth entre dos móviles (E15) ni una descarga correcta de un endpoint HTTPS (E12).
+- El flujo de GitHub Actions (`.github/workflows/android.yml`) falla en el paso `setup-android` antes de compilar. No afecta a los tests locales y no se ha modificado.
+
+## Qué contiene el proyecto
 Aplicación base + 16 archivos Kotlin de ejemplos + 16 archivos Kotlin evaluables + documentación por ejercicio + pruebas locales e instrumentadas. Las carpetas ejemplos/ y evaluables/ contienen exactamente 16 .kt cada una. Los demás .kt son infraestructura o tests, no ejercicios adicionales.
 
 ## Estado de verificación (edición 2.1)
@@ -24,7 +33,7 @@ Esta edición se ha compilado de verdad y se han ejecutado sus pruebas automáti
 - Scripts de ayuda en scripts/. No sustituyen instalar las herramientas.
 - Informe JUnit: app/build/reports/tests/testDebugUnitTest/index.html.
 
-Hay 64 métodos @Test locales en ALUMNO (54 originales más 10 de CheckerTest, que comprueba que el verificador funciona) y 66 en PROFESOR. Los 54 originales son: 16 de ejemplos, 32 de contratos/límites de evaluables y 6 de base; los nuevos pertenecen a CheckerTest. Hay 3 métodos instrumentados: 2 de persistencia y 1 de arranque de interfaz (requieren emulador o móvil). En ALUMNO, los 32 tests de evaluables deben fallar inicialmente por TODO; no los borres ni los marques ignorados para aparentar éxito.
+Hay 64 métodos @Test locales en ALUMNO (54 originales más 10 de CheckerTest, que comprueba que el verificador funciona) y 66 en PROFESOR. Los 54 originales son: 16 de ejemplos, 32 de contratos/límites de evaluables y 6 de base; los nuevos pertenecen a CheckerTest. Hay 3 métodos instrumentados: 2 de persistencia y 1 de arranque de interfaz (requieren emulador o móvil). En la versión ALUMNO original, los 32 tests de evaluables fallaban inicialmente por TODO. En esta entrega los `TODO` están resueltos, por tanto todos pasan.
 
 ## Uso y navegación
 Catálogo inicial de 16 futbolistas: busca, filtra por club y favoritos, abre ficha y guarda anotaciones. Menú: Academia, equipos, comparar, alineación, colecciones, copia, datos sin conexión, cuestionario, panel y recepción Bluetooth.
