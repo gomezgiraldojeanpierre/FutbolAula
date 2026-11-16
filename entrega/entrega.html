@@ -1,0 +1,393 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><title>Entrega Fútbol Aula</title>
+<style>
+@page { size: A4; margin: 16mm 14mm; }
+body { font-family: 'Segoe UI', Arial, sans-serif; font-size: 10.5pt; color: #1b1f24; line-height: 1.4; }
+h1 { font-size: 22pt; margin: 0 0 4pt; }
+h2 { font-size: 15pt; border-bottom: 2px solid #0b6b5a; padding-bottom: 3pt; margin: 0 0 8pt; color: #0b6b5a; }
+h3 { font-size: 11pt; margin: 10pt 0 4pt; }
+code { font-family: Consolas, monospace; background: #eef2f4; padding: 0 3px; border-radius: 3px; font-size: 9.5pt; }
+pre { font-family: Consolas, monospace; font-size: 7.6pt; background: #f6f8fa; border: 1px solid #d8dee4; padding: 6pt; white-space: pre-wrap; line-height: 1.25; }
+.ex { page-break-before: always; }
+ol { margin: 4pt 0 8pt 18pt; padding: 0; }
+.caps { display: flex; flex-wrap: wrap; gap: 8pt; }
+figure { margin: 0; width: 31%; break-inside: avoid; }
+figure img { width: 100%; border: 1px solid #c9d1d9; border-radius: 4px; }
+figcaption { font-size: 8.5pt; color: #4b5563; margin-top: 2pt; }
+table { border-collapse: collapse; width: 100%; font-size: 9.5pt; }
+td, th { border: 1px solid #d0d7de; padding: 3pt 6pt; text-align: left; vertical-align: top; }
+th { background: #eef2f4; }
+</style></head><body>
+<h1>Fútbol Aula · Entrega E01–E16</h1>
+<p>Proyecto final de Móviles, primera evaluación. Fecha: 16/11/2026.</p>
+<h2>Resultado real de las pruebas</h2>
+<ul>
+<li><code>gradlew.bat testDebugUnitTest --offline</code>: 67 tests, 0 fallos (64 originales más 3 de la ampliación de E16).</li>
+<li><code>gradlew.bat assembleDebug --offline</code>: compila sin errores.</li>
+<li>Comprobar E## en Academia (en verde, con captura): E07, E08, E12, E13, E14 y E15.</li>
+<li>No se han ejecutado: <code>connectedDebugAndroidTest</code>, el sensor de agitar (E05), el intercambio Bluetooth real entre dos móviles (E15), la descarga correcta de un endpoint HTTPS (E12) ni las pruebas de permiso de micrófono rechazado y de descarte de una grabación sin guardar (E08).</li>
+</ul>
+<h2>Cambios fuera de los archivos evaluables</h2>
+<ul>
+<li><code>MainActivity.kt</code>: al importar una imagen, <code>inSampleSize</code> empezaba en 0 y la división posterior lanzaba "divide by zero"; ahora se inicializa en 1.</li>
+<li><code>MainActivity.kt</code>: el panel de E16 muestra una línea con <code>E16Panel.summary</code> (ampliación propia, pendiente de acordar con el docente).</li>
+<li><code>E16AmpliacionTest.kt</code>: tres pruebas nuevas para la ampliación.</li>
+</ul>
+<h2>Índice</h2>
+<table><tr><th>Ejercicio</th><th>Título</th></tr><tr><td>E01</td><td>Más equipos reales</td></tr><tr><td>E02</td><td>Buscar, filtrar y ordenar</td></tr><tr><td>E03</td><td>Etiquetas y valoración personal</td></tr><tr><td>E04</td><td>Comparar fichas sin inventar datos</td></tr><tr><td>E05</td><td>Sorpresa respetando filtros</td></tr><tr><td>E06</td><td>Filtro de contraste reversible</td></tr><tr><td>E07</td><td>Imagen persistente por jugador</td></tr><tr><td>E08</td><td>Playlist y comentarios de voz</td></tr><tr><td>E09</td><td>Once inicial 4-3-3</td></tr><tr><td>E10</td><td>Colecciones múltiples</td></tr><tr><td>E11</td><td>Copia de seguridad validada</td></tr><tr><td>E12</td><td>Datos guardados sin conexión</td></tr><tr><td>E13</td><td>Reto de cinco preguntas</td></tr><tr><td>E14</td><td>Diseñar y compartir cromo</td></tr><tr><td>E15</td><td>Intercambio con confirmación</td></tr><tr><td>E16</td><td>Panel de mi colección</td></tr></table><section class="ex"><h2>E01 · Más equipos reales</h2><h3>Cinco líneas</h3><ol><li>Hemos implementado <code>addTeam</code>: rechaza lote vacío, varios clubes, posición no admitida, fuente sin HTTPS, IDs repetidos y jugador repetido en su club.</li><li>Punto delicado: los clubes se comparan con <code>TextKey</code>, porque así &quot;Athletic Club&quot; y &quot;athletic club&quot; cuentan como uno solo.</li><li>Los dos clubes añadidos son los lotes de referencia de la app (Athletic Club y Atlético de Madrid), con cinco fichas y fuente HTTPS cada uno; no hemos inventado datos.</li><li>Lo comprobamos con <code>E01Test</code> y con el formulario de Añadir equipos: la primera captura carga los lotes y la segunda rechaza un ID repetido.</li><li>Resultado: lote válido aceptado y persistido; ID repetido rechazado con mensaje visible.</li></ol><h3>Capturas</h3><div class='caps'><figure><img src='capturas/1.png'><figcaption>Caso correcto: cuatro clubes disponibles tras cargar los lotes.</figcaption></figure><figure><img src='capturas/2.png'><figcaption>Validación: el ID 1 ya existe y se rechaza.</figcaption></figure></div><h3>Código: <code>E01Catalogo.kt</code></h3><pre>package es.aula.futbol
+
+// Declara el objeto E01Catalogo: aquí vive tu solución evaluable.
+object E01Catalogo {
+ // Añade un lote nuevo al catálogo actual, validando todas las reglas.
+ // ENTRADA: current = lista actual; incoming = lote nuevo de UN club.
+ // SALIDA: la lista actualizada. Si algo no cumple las reglas: error (require).
+ fun addTeam(current: List&lt;Player&gt;, incoming: List&lt;Player&gt;): List&lt;Player&gt; {
+  // Posiciones admitidas: son las mismas que usa el resto de la app.
+  val positions = setOf(&quot;Portero&quot;, &quot;Defensa&quot;, &quot;Centrocampista&quot;, &quot;Delantero&quot;)
+  // Un lote vacío no aporta nada, por tanto se rechaza.
+  require(incoming.isNotEmpty()) { &quot;El lote está vacío&quot; }
+  // Todo el lote debe pertenecer a un único club (se compara sin tildes ni mayúsculas).
+  val clubs = incoming.map { TextKey.of(it.club) }.toSet()
+  require(clubs.size == 1 &amp;&amp; clubs.first().isNotEmpty()) { &quot;Un lote debe tener un único club&quot; }
+  // Cada ficha necesita nombre, posición conocida y fuente HTTPS: así no se inventan datos.
+  incoming.forEach { p -&gt;
+   require(p.name.isNotBlank()) { &quot;Ficha sin nombre (id ${p.id})&quot; }
+   require(p.position in positions) { &quot;Posición no admitida: ${p.position}&quot; }
+   require(p.source.startsWith(&quot;https://&quot;) &amp;&amp; p.source.length &gt; 8) { &quot;La fuente de ${p.name} debe ser HTTPS&quot; }
+  }
+  // Los IDs no pueden repetirse dentro del lote ni chocar con el catálogo actual.
+  val ids = incoming.map { it.id }
+  require(ids.toSet().size == ids.size) { &quot;IDs repetidos dentro del lote&quot; }
+  require(ids.none { id -&gt; current.any { it.id == id } }) { &quot;Alguno de los IDs ya existe en el catálogo&quot; }
+  // Un jugador es el mismo si coinciden nombre y club, aunque tenga otro ID.
+  fun key(p: Player) = TextKey.of(p.name) + &quot;|&quot; + TextKey.of(p.club)
+  val seen = current.map { key(it) }.toMutableSet()
+  incoming.forEach { require(seen.add(key(it))) { &quot;Jugador repetido en su club: ${it.name}&quot; } }
+  // Todo es válido: se devuelve el catálogo actual más el lote, sin tocar el original.
+  return current + incoming
+ }
+ // demo() lo usa Academia para probar tu función con el lote del Athletic.
+ // Devuelve cuántos jugadores hay tras añadirlo (16 + 5 = 21).
+ fun demo(): String = addTeam(Seed.players, Seed.extra).size.toString()
+}
+</pre></section><section class="ex"><h2>E02 · Buscar, filtrar y ordenar</h2><h3>Cinco líneas</h3><ol><li>Hemos implementado <code>filter</code>: combina texto, club, posición y favoritos con AND, y ordena por nombre normalizado.</li><li>Punto delicado: el texto se busca solo en el nombre, por tanto escribir un club en el cuadro de búsqueda no devuelve resultados; el club se elige en el desplegable.</li><li>El orden descendente es el ascendente invertido, así que ambos resultados siempre son coherentes.</li><li>Lo comprobamos con <code>E02Test</code> y con la pantalla: <code>MBAPPE</code> encuentra a Mbappé y <code>nadie</code> deja la lista vacía.</li><li>Resultado: filtros combinados correctos y lista vacía controlada con mensaje.</li></ol><h3>Capturas</h3><div class='caps'><figure><img src='capturas/3.png'><figcaption>Caso correcto: la búsqueda sin tilde y en mayúsculas encuentra a Mbappé.</figcaption></figure><figure><img src='capturas/4.png'><figcaption>Validación: sin coincidencias, mensaje controlado.</figcaption></figure></div><h3>Código: <code>E02Filtros.kt</code></h3><pre>package es.aula.futbol
+
+// Declara el objeto E02Filtros: aquí vive tu solución evaluable.
+object E02Filtros {
+ // Filtra y ordena el catálogo combinando todos los criterios a la vez.
+ // ENTRADA: rows = catálogo; query = texto; club/position = filtros exactos
+ // (vacío significa &quot;todos&quot;); favorites/onlyFavorites = filtro de favoritos;
+ // descending = true ordena de la Z a la A.
+ // SALIDA: la lista que cumple TODO a la vez, ordenada por nombre.
+ fun filter(rows: List&lt;Player&gt;, query: String, club: String, position: String, favorites: Set&lt;Int&gt;, onlyFavorites: Boolean, descending: Boolean): List&lt;Player&gt; {
+  // Se normaliza el texto una sola vez: así &quot;MBAPPÉ&quot; y &quot;mbappe&quot; son la misma búsqueda.
+  val text = TextKey.of(query)
+  // Las cuatro condiciones se combinan con AND; un filtro vacío significa &quot;todos&quot;.
+  val found = rows.filter { p -&gt;
+   (text.isEmpty() || TextKey.of(p.name).contains(text)) &amp;&amp;
+    (club.isEmpty() || p.club == club) &amp;&amp;
+    (position.isEmpty() || p.position == position) &amp;&amp;
+    (!onlyFavorites || p.id in favorites)
+  }
+  // Se ordena por nombre normalizado; en descendente basta con invertir el resultado.
+  val ordered = found.sortedBy { TextKey.of(it.name) }
+  return if (descending) ordered.reversed() else ordered
+ }
+ // demo() lo usa Academia: filtra los delanteros del Barça sin favoritos.
+ fun demo(): String = filter(Seed.players, &quot;&quot;, &quot;FC Barcelona&quot;, &quot;Delantero&quot;, emptySet(), false, false).joinToString { it.name }
+}
+</pre></section><section class="ex"><h2>E03 · Etiquetas y valoración personal</h2><h3>Cinco líneas</h3><ol><li>Hemos implementado <code>mark</code>: recorta etiquetas, quita vacías y repetidas sin distinguir tildes ni mayúsculas, admite como máximo cinco de 24 caracteres y valida la valoración de 0 a 5.</li><li>Punto delicado: el máximo de cinco se cuenta después de limpiar, porque &quot;Pase&quot; y &quot; pase &quot; son una sola etiqueta.</li><li><code>copy</code> conserva el favorito y la nota de la ficha.</li><li>Lo comprobamos con <code>E03Test</code> y en la ficha de Raphinha: valoración 4 guardada y valoración 6 rechazada.</li><li>Resultado: etiquetas equivalentes no se repiten y la valoración fuera de rango se rechaza.</li></ol><h3>Capturas</h3><div class='caps'><figure><img src='capturas/7.png'><figcaption>Caso correcto: etiquetas repetidas y valoración 4 guardadas.</figcaption></figure><figure><img src='capturas/6.png'><figcaption>Validación: la valoración 6 se rechaza.</figcaption></figure></div><h3>Código: <code>E03Etiquetas.kt</code></h3><pre>package es.aula.futbol
+
+// Declara el objeto E03Etiquetas: aquí vive tu solución evaluable.
+object E03Etiquetas {
+ // Guarda etiquetas limpias y valoración personal sobre una marca existente.
+ // ENTRADA: original = la marca actual; tags = etiquetas escritas por el alumno;
+ // rating = valoración personal de 0 a 5.
+ // SALIDA: una Mark nueva con las etiquetas y valoración ya validadas.
+ fun mark(original: Mark, tags: List&lt;String&gt;, rating: Int): Mark {
+  // Se recortan las etiquetas y se descartan las vacías.
+  val trimmed = tags.map { it.trim() }.filter { it.isNotEmpty() }
+  // Ninguna etiqueta puede superar los 24 caracteres.
+  require(trimmed.all { it.length &lt;= 24 }) { &quot;Cada etiqueta admite como máximo 24 caracteres&quot; }
+  // Se eliminan las repetidas sin distinguir tildes ni mayúsculas; se conserva la primera escrita.
+  val seen = mutableSetOf&lt;String&gt;()
+  val clean = trimmed.filter { seen.add(TextKey.of(it)) }
+  // El máximo de cinco se cuenta después de limpiar, porque &quot;Pase&quot; y &quot; pase &quot; son una sola.
+  require(clean.size &lt;= 5) { &quot;Se admiten como máximo 5 etiquetas&quot; }
+  // La valoración es personal y va de 0 a 5.
+  require(rating in 0..5) { &quot;La valoración debe estar entre 0 y 5&quot; }
+  // copy conserva favorito y nota, que son las otras propiedades de la ficha.
+  return original.copy(tags = clean, rating = rating)
+ }
+ // demo() lo usa Academia: guarda dos etiquetas repetidas y valoración 4.
+ fun demo(): String = mark(Mark(),listOf(&quot;Técnica&quot;,&quot; técnica &quot;),4).toString()
+}
+</pre></section><section class="ex"><h2>E04 · Comparar fichas sin inventar datos</h2><h3>Cinco líneas</h3><ol><li>Hemos implementado <code>compare</code>: exige de dos a cuatro fichas con IDs distintos y devuelve una línea <code>nombre | club | posición</code> por jugador.</li><li>Punto delicado: solo se muestran campos reales de la ficha, por tanto no hay ganador ni estadísticas inventadas.</li><li>Un solo jugador, una lista vacía o un jugador repetido lanzan <code>IllegalArgumentException</code>.</li><li>Lo comprobamos con <code>E04Test</code> y con la pantalla Comparar jugadores.</li><li>Resultado: tres fichas comparadas correctamente y una selección insuficiente rechazada.</li></ol><h3>Capturas</h3><div class='caps'><figure><img src='capturas/8.png'><figcaption>Caso correcto: tres jugadores comparados.</figcaption></figure><figure><img src='capturas/9.png'><figcaption>Validación: con menos de dos jugadores se rechaza.</figcaption></figure></div><h3>Código: <code>E04Comparador.kt</code></h3><pre>package es.aula.futbol
+
+// Declara el objeto E04Comparador: aquí vive tu solución evaluable.
+object E04Comparador {
+ // Compara varias fichas y devuelve el texto con la comparación.
+ // ENTRADA: rows = de 2 a 4 jugadores distintos.
+ // SALIDA: texto legible con la comparación real; error si incumple las reglas.
+ fun compare(rows: List&lt;Player&gt;): String {
+  // Se exigen de dos a cuatro fichas; con menos no hay comparación y con más no cabe en pantalla.
+  require(rows.size in 2..4) { &quot;Elige de 2 a 4 jugadores&quot; }
+  require(rows.map { it.id }.toSet().size == rows.size) { &quot;No se puede comparar un jugador consigo mismo&quot; }
+  // Solo se muestran campos reales de la ficha; no hay puntuaciones ni ganador.
+  return rows.joinToString(&quot;\n&quot;) { &quot;${it.name} | ${it.club} | ${it.position}&quot; }
+ }
+ // demo() lo usa Academia: compara a los dos primeros del catálogo.
+ fun demo(): String = compare(Seed.players.take(2))
+}
+</pre></section><section class="ex"><h2>E05 · Sorpresa respetando filtros</h2><h3>Cinco líneas</h3><ol><li>Hemos implementado <code>choose</code>: devuelve <code>null</code> si no hay candidatos y usa <code>Math.floorMod</code> para que cualquier índice dé la vuelta.</li><li>Punto delicado: el operador <code>%</code> de Kotlin devuelve negativos, por eso <code>-1</code> debe llevar al último jugador y no fallar.</li><li>La elección sale solo de la lista recibida, es decir, respeta los filtros visibles.</li><li>Lo comprobamos con <code>E05Test</code> y con el botón E05: con el filtro FC Barcelona sale Dani Olmo, y con <code>nadie</code> sale &quot;Sin candidatos&quot;.</li><li>No hemos probado el sensor de agitar; el botón E05 ejecuta la misma función.</li></ol><h3>Capturas</h3><div class='caps'><figure><img src='capturas/10.png'><figcaption>Catálogo filtrado por FC Barcelona.</figcaption></figure><figure><img src='capturas/11.png'><figcaption>Caso correcto: la sorpresa sale de la lista filtrada.</figcaption></figure><figure><img src='capturas/12.png'><figcaption>Validación: sin candidatos, la app no falla.</figcaption></figure></div><h3>Código: <code>E05Sensor.kt</code></h3><pre>package es.aula.futbol
+
+// Declara el objeto E05Sensor: aquí vive tu solución evaluable.
+object E05Sensor {
+ // Elige un jugador de la lista con un índice que da la vuelta.
+ // ENTRADA: candidates = lista visible tras filtros; index = número cualquiera.
+ // SALIDA: el jugador elegido, o null si la lista está vacía.
+ fun choose(candidates: List&lt;Player&gt;, index: Int): Player? {
+  // Sin candidatos no hay a quién elegir.
+  if (candidates.isEmpty()) return null
+  // floorMod nunca devuelve negativos: 16 sobre 16 jugadores da la vuelta y -1 lleva al último.
+  return candidates[Math.floorMod(index, candidates.size)]
+ }
+ // demo() lo usa Academia: elige el primero de los jugadores del Barça.
+ fun demo(): String = choose(Seed.players.filter { it.club == &quot;FC Barcelona&quot; },0)?.name ?: &quot;Sin candidatos&quot;
+}
+</pre></section><section class="ex"><h2>E06 · Filtro de contraste reversible</h2><h3>Cinco líneas</h3><ol><li>Hemos implementado <code>parameters</code>: rechaza NaN y valores fuera de 0 a 3, y devuelve <code>(valor, 128·(1−valor))</code>.</li><li>Error encontrado: al importar una imagen, la app base fallaba con &quot;divide by zero&quot; porque <code>inSampleSize</code> empezaba en 0; lo corregimos en <code>MainActivity.kt</code>.</li><li>Con contraste 1 el desplazamiento es 0 y con contraste 0 es 128, lo que se aprecia como gris liso.</li><li>Lo comprobamos con <code>E06Test</code> y en pantalla: contraste 0 visible y contraste 4 rechazado.</li><li>El original se conserva y se recupera con &quot;Recuperar original&quot;.</li></ol><h3>Capturas</h3><div class='caps'><figure><img src='capturas/14.png'><figcaption>Imagen propia importada tras corregir el fallo.</figcaption></figure><figure><img src='capturas/16.png'><figcaption>Contraste 0: la imagen queda en gris liso.</figcaption></figure><figure><img src='capturas/17.png'><figcaption>Imagen normal tras recuperar el original.</figcaption></figure><figure><img src='capturas/15.png'><figcaption>Validación: el contraste 4 se rechaza.</figcaption></figure></div><h3>Código: <code>E06Contraste.kt</code></h3><pre>package es.aula.futbol
+
+// Declara el objeto E06Contraste: aquí vive tu solución evaluable.
+object E06Contraste {
+ // Calcula los parámetros de la matriz de contraste para un valor dado.
+ // ENTRADA: value = contraste pedido, entre 0 y 3 (no puede ser NaN).
+ // SALIDA: el par (escala, desplazamiento) para la matriz de color.
+ fun parameters(value: Float): Pair&lt;Float, Float&gt; {
+  // NaN, infinitos y valores fuera de 0..3 se rechazan antes de calcular nada.
+  require(value.isFinite() &amp;&amp; value in 0f..3f) { &quot;El contraste debe estar entre 0 y 3&quot; }
+  // Escala = valor; desplazamiento = 128 * (1 - valor). Con valor 1 el nivel no cambia.
+  return Pair(value, 128f * (1f - value))
+ }
+ // demo() lo usa Academia: pide los parámetros del contraste 1.4.
+ fun demo(): String = parameters(1.4f).toString()
+}
+</pre></section><section class="ex"><h2>E07 · Imagen persistente por jugador</h2><h3>Cinco líneas</h3><ol><li>Hemos implementado <code>filename</code>: exige ID positivo y extensión <code>png</code> o <code>jpg</code>, y construye <code>jugador_ID.ext</code> sin rutas del usuario.</li><li>Punto delicado: comparar la extensión de forma exacta impide que entren <code>../</code> o barras en el nombre.</li><li>La imagen se conserva con el botón E07 y se recupera al reabrir la ficha de Pedri.</li><li>Lo comprobamos con <code>E07Test</code>, con Comprobar E07 en verde y reiniciando la app.</li><li>Resultado: la imagen reaparece solo en su ficha; la de Dean Huijsen no cambia.</li></ol><h3>Capturas</h3><div class='caps'><figure><img src='capturas/19.png'><figcaption>Imagen persistida.</figcaption></figure><figure><img src='capturas/21.png'><figcaption>Tras cerrar y reabrir la app, la imagen sigue en la ficha.</figcaption></figure><figure><img src='capturas/20.png'><figcaption>Otra ficha no cambia.</figcaption></figure><figure><img src='capturas/18.png'><figcaption>Validación: `../`, ID 0 y `gif` se rechazan.</figcaption></figure></div><h3>Código: <code>E07Imagen.kt</code></h3><pre>package es.aula.futbol
+
+// Declara el objeto E07Imagen: aquí vive tu solución evaluable.
+object E07Imagen {
+ // Construye el nombre de archivo seguro para la imagen de un jugador.
+ // ENTRADA: id = número positivo del jugador; extension = &quot;png&quot; o &quot;jpg&quot;.
+ // SALIDA: el nombre de archivo; error si el ID o la extensión no son válidos.
+ fun filename(id: Int, extension: String): String {
+  // Un ID positivo evita nombres como &quot;jugador_0&quot; o &quot;jugador_-3&quot;.
+  require(id &gt; 0) { &quot;El ID debe ser positivo&quot; }
+  // Solo se admiten png y jpg; así nunca entra una ruta con &quot;../&quot; o barras en el nombre.
+  require(extension == &quot;png&quot; || extension == &quot;jpg&quot;) { &quot;Extensión no admitida: use png o jpg&quot; }
+  // El nombre lo construimos nosotros, el usuario no aporta ninguna ruta.
+  return &quot;jugador_$id.$extension&quot;
+ }
+ // demo() lo usa Academia: el nombre del jugador 7 en formato png.
+ fun demo(): String = filename(7,&quot;png&quot;)
+}
+</pre></section><section class="ex"><h2>E08 · Playlist y comentarios de voz</h2><h3>Cinco líneas</h3><ol><li>Hemos implementado <code>next</code>: admite solo dirección −1 o 1, devuelve <code>null</code> con lista vacía, valida el índice y recorre en círculo.</li><li>Punto delicado: desde el primero hacia atrás se llega al último, por eso se usa <code>Math.floorMod</code>.</li><li>Grabamos dos comentarios de la ficha de Pedri y comprobamos su playlist y la reproducción.</li><li>Lo comprobamos con <code>E08Test</code> y con Comprobar E08 en verde.</li><li>Resultado: playlist con dos audios y recorrido circular validado.</li></ol><h3>Capturas</h3><div class='caps'><figure><img src='capturas/22.png'><figcaption>Comentario guardado.</figcaption></figure><figure><img src='capturas/23.png'><figcaption>Playlist con los dos comentarios.</figcaption></figure><figure><img src='capturas/25.png'><figcaption>Reproducción en curso.</figcaption></figure><figure><img src='capturas/24.png'><figcaption>Fin del audio.</figcaption></figure><figure><img src='capturas/26.png'><figcaption>Validación: Comprobar E08 en verde.</figcaption></figure></div><h3>Código: <code>E08Audio.kt</code></h3><pre>package es.aula.futbol
+
+// Declara el objeto E08Audio: aquí vive tu solución evaluable.
+object E08Audio {
+ // Calcula el índice del audio anterior o siguiente en la playlist.
+ // ENTRADA: current = índice actual; size = cuántos audios hay;
+ // direction = -1 (anterior) o 1 (siguiente).
+ // SALIDA: el nuevo índice (con vuelta circular), o null si no hay audios.
+ fun next(current: Int, size: Int, direction: Int): Int? {
+  // Solo hay dos movimientos posibles: anterior (-1) o siguiente (1).
+  require(direction == -1 || direction == 1) { &quot;La dirección debe ser -1 o 1&quot; }
+  require(size &gt;= 0) { &quot;El tamaño no puede ser negativo&quot; }
+  // Sin audios no hay hacia dónde moverse.
+  if (size == 0) return null
+  // El índice actual debe existir en la lista.
+  require(current in 0 until size) { &quot;El índice actual está fuera de la lista&quot; }
+  // Recorrido circular: desde el primero hacia atrás se llega al último.
+  return Math.floorMod(current + direction, size)
+ }
+ // demo() lo usa Academia: el anterior al primero de una lista de 3 (circular).
+ fun demo(): String = next(0,3,-1).toString()
+}
+</pre></section><section class="ex"><h2>E09 · Once inicial 4-3-3</h2><h3>Cinco líneas</h3><ol><li>Hemos implementado <code>validate</code>: exige once jugadores con IDs distintos y reparto 1-4-3-3; nunca lanza error.</li><li>Punto delicado: como las posiciones exigidas suman once, cualquier otra posición queda descartada sola.</li><li>Con los lotes de referencia hay cinco defensas, por tanto se puede montar un once completo.</li><li>Lo comprobamos con <code>E09Test</code> y en la pantalla Alineación: once válido y once con 10/11.</li><li>Resultado: el borrador incompleto se guarda y solo el once completo se valida.</li></ol><h3>Capturas</h3><div class='caps'><figure><img src='capturas/27.png'><figcaption>Caso correcto: once válido.</figcaption></figure><figure><img src='capturas/28.png'><figcaption>Validación: once incompleto 10/11.</figcaption></figure></div><h3>Código: <code>E09Alineacion.kt</code></h3><pre>package es.aula.futbol
+
+// Declara el objeto E09Alineacion: aquí vive tu solución evaluable.
+object E09Alineacion {
+ // Comprueba si la lista forma un once 4-3-3 completo y válido.
+ // ENTRADA: rows = los jugadores elegidos (puede venir incompleta).
+ // SALIDA: true solo si es un once válido; false en cualquier otro caso.
+ fun validate(rows: List&lt;Player&gt;): Boolean {
+  // Esta función solo responde sí o no: nunca lanza error.
+  if (rows.size != 11) return false
+  // Once jugadores con IDs distintos; un repetido invalida la alineación.
+  if (rows.map { it.id }.toSet().size != 11) return false
+  // Reparto exacto 1-4-3-3; como suman 11, cualquier otra posición queda descartada sola.
+  val count = rows.groupingBy { it.position }.eachCount()
+  return count[&quot;Portero&quot;] == 1 &amp;&amp; count[&quot;Defensa&quot;] == 4 &amp;&amp;
+   count[&quot;Centrocampista&quot;] == 3 &amp;&amp; count[&quot;Delantero&quot;] == 3
+ }
+ // demo() lo usa Academia: valida los primeros 11 del catálogo (no es un 4-3-3).
+ fun demo(): String = validate(Seed.players.take(11)).toString()
+}
+</pre></section><section class="ex"><h2>E10 · Colecciones múltiples</h2><h3>Cinco líneas</h3><ol><li>Hemos implementado <code>add</code>: recorta el nombre, exige de 1 a 40 caracteres y rechaza nombres equivalentes sin tildes, mayúsculas ni espacios.</li><li>Punto delicado: la clave de comparación elimina los espacios, así que &quot;Mi once&quot; y &quot;mionce&quot; se consideran iguales.</li><li>Borrar una colección no borra fichas ni otras colecciones.</li><li>Lo comprobamos con <code>E10Test</code> y en pantalla: <code>tecnica</code> se rechaza porque ya existe <code>Tecnica</code>.</li><li>Resultado: colecciones creadas, rechazo del nombre equivalente, integrantes sin duplicados y borrado independiente.</li></ol><h3>Capturas</h3><div class='caps'><figure><img src='capturas/29.png'><figcaption>Caso correcto: dos colecciones creadas.</figcaption></figure><figure><img src='capturas/30.png'><figcaption>Validación: nombre equivalente rechazado.</figcaption></figure><figure><img src='capturas/33.png'><figcaption>Integrantes añadidos a la colección.</figcaption></figure><figure><img src='capturas/31.png'><figcaption>Confirmación de borrado.</figcaption></figure><figure><img src='capturas/32.png'><figcaption>La otra colección sigue intacta.</figcaption></figure></div><h3>Código: <code>E10Colecciones.kt</code></h3><pre>package es.aula.futbol
+
+// Declara el objeto E10Colecciones: aquí vive tu solución evaluable.
+object E10Colecciones {
+ // Añade un nombre de colección nuevo, validado y limpio.
+ // ENTRADA: names = nombres que ya existen; name = el nombre que se quiere añadir.
+ // SALIDA: la lista de nombres con el nuevo incluido; error si no es válido.
+ fun add(names: List&lt;String&gt;, name: String): List&lt;String&gt; {
+  // Se recorta el nombre y se exige una longitud de 1 a 40 caracteres.
+  val clean = name.trim()
+  require(clean.length in 1..40) { &quot;El nombre debe tener entre 1 y 40 caracteres&quot; }
+  // Clave de comparación: sin tildes, sin mayúsculas y sin espacios.
+  fun key(value: String) = TextKey.of(value).replace(Regex(&quot;\\s+&quot;), &quot;&quot;)
+  require(names.none { key(it) == key(clean) }) { &quot;Ya existe una colección con ese nombre&quot; }
+  // Lista previa más el nombre limpio al final.
+  return names + clean
+ }
+ // demo() lo usa Academia: añade &quot;Mi once&quot; a una lista que ya tiene &quot;Promesas&quot;.
+ fun demo(): String = add(listOf(&quot;Promesas&quot;),&quot;Mi once&quot;).joinToString()
+}
+</pre></section><section class="ex"><h2>E11 · Copia de seguridad validada</h2><h3>Cinco líneas</h3><ol><li>Hemos implementado <code>restore</code>: valida con <code>Wire.decode</code> antes de mezclar y sobrescribe solo favorito y nota de los IDs presentes.</li><li>Punto delicado: partimos de los datos actuales, por tanto los jugadores ausentes de la copia se conservan; etiquetas y valoración también.</li><li>Un texto que no es JSON lanza una excepción antes de escribir ningún dato.</li><li>Lo comprobamos con <code>E11Test</code> y en pantalla: exportar, importar, confirmar y restaurar en transacción.</li><li>No hemos hecho la captura de importar un archivo inválido; lo cubren <code>E11Test</code> y Comprobar E11.</li></ol><h3>Capturas</h3><div class='caps'><figure><img src='capturas/35.png'><figcaption>Copia exportada.</figcaption></figure><figure><img src='capturas/36.png'><figcaption>Diálogo de confirmación: 26 registros.</figcaption></figure><figure><img src='capturas/37.png'><figcaption>Copia restaurada en transacción.</figcaption></figure></div><h3>Código: <code>E11Copia.kt</code></h3><pre>package es.aula.futbol
+
+// Declara el objeto E11Copia: aquí vive tu solución evaluable.
+object E11Copia {
+ // Lee y valida una copia de seguridad para poder restaurarla.
+ // ENTRADA: current = datos actuales; text = texto JSON de la copia;
+ // known = IDs que existen en este dispositivo.
+ // SALIDA: mapa con los datos recuperables; error si la copia es inválida.
+ fun restore(current: Map&lt;Int, Mark&gt;, text: String, known: Set&lt;Int&gt;): Map&lt;Int, Mark&gt; {
+  // Wire.decode valida versión, tipos y duplicados, y descarta los IDs desconocidos.
+  // Si el texto no es JSON lanza una excepción antes de tocar ningún dato.
+  val backup = Wire.decode(text, known)
+  // Se parte de los datos actuales para conservar los jugadores ausentes de la copia.
+  val result = LinkedHashMap(current)
+  // La copia sobrescribe solo favorito y nota; etiquetas y valoración se mantienen.
+  backup.forEach { (id, mark) -&gt;
+   result[id] = (current[id] ?: Mark()).copy(favorite = mark.favorite, note = mark.note)
+  }
+  return result
+ }
+ // demo() lo usa Academia: restaura una copia mínima con un favorito.
+ fun demo(): String = restore(emptyMap(),Wire.encode(mapOf(1 to Mark(true,&quot;Nota&quot;))),setOf(1)).toString()
+}
+</pre></section><section class="ex"><h2>E12 · Datos guardados sin conexión</h2><h3>Cinco líneas</h3><ol><li>Hemos implementado <code>resolve</code>: una respuesta remota válida, aunque vacía, se muestra como actual (<code>stale=false</code>).</li><li>Punto delicado: si falla la descarga se usan los datos guardados con <code>stale=true</code>, y sin datos guardados la lista queda vacía con un mensaje claro.</li><li>Lo comprobamos con <code>E12Test</code> y con la pantalla Datos sin conexión.</li><li>Con un endpoint no válido la app conserva los 26 jugadores guardados y lo indica.</li><li>No hemos probado una descarga correcta, porque exige un endpoint HTTPS propio.</li></ol><h3>Capturas</h3><div class='caps'><figure><img src='capturas/38.png'><figcaption>Fallo de descarga: se muestran los datos guardados.</figcaption></figure><figure><img src='capturas/39.png'><figcaption>Comprobar E12 en verde.</figcaption></figure></div><h3>Código: <code>E12Cache.kt</code></h3><pre>package es.aula.futbol
+
+// Declara el objeto E12Cache: aquí vive tu solución evaluable.
+object E12Cache {
+ // Decide qué datos mostrar según cómo fue la descarga.
+ // ENTRADA: remote = catálogo descargado (null si falló); saved = datos guardados;
+ // error = mensaje del fallo (null si todo fue bien).
+ // SALIDA: CacheResult con las filas a mostrar, si están caducadas y el mensaje.
+ fun resolve(remote: List&lt;Player&gt;?, saved: List&lt;Player&gt;, error: String?): CacheResult {
+  // Respuesta válida: remote existe y no hubo error. Una lista vacía también es válida.
+  if (remote != null &amp;&amp; error == null) return CacheResult(remote, false, &quot;Actualizado&quot;)
+  // La descarga falló: se mantiene el último resultado guardado y se marca como caducado.
+  val reason = error ?: &quot;sin respuesta&quot;
+  if (saved.isNotEmpty()) return CacheResult(saved, true, &quot;Sin conexión ($reason). Se muestran los datos guardados&quot;)
+  // Primera apertura sin red: no hay nada que enseñar, pero la app sigue funcionando.
+  return CacheResult(emptyList(), true, &quot;Sin datos: no hay conexión ($reason) ni datos guardados&quot;)
+ }
+ // demo() lo usa Academia: qué pasa si no hay red y solo están los datos iniciales.
+ fun demo(): String = resolve(null,Seed.players,&quot;sin red&quot;).message
+}
+</pre></section><section class="ex"><h2>E13 · Reto de cinco preguntas</h2><h3>Cinco líneas</h3><ol><li>Hemos implementado <code>build</code>: valida cantidad, IDs, jugadores suficientes y al menos dos clubes, y crea preguntas de jugadores distintos.</li><li>Punto delicado: el distractor se elige entre los clubes distintos del correcto, por eso las dos opciones nunca coinciden.</li><li>La pantalla ya controla una respuesta por pregunta, la puntuación y el mejor resultado.</li><li>Lo comprobamos con <code>E13Test</code>, con Comprobar E13 en verde y jugando una partida completa.</li><li>Resultado: 5/5 y mejor resultado conservado.</li></ol><h3>Capturas</h3><div class='caps'><figure><img src='capturas/42.png'><figcaption>Una pregunta con dos opciones distintas.</figcaption></figure><figure><img src='capturas/40.png'><figcaption>Resultado final y mejor resultado.</figcaption></figure><figure><img src='capturas/41.png'><figcaption>Validación: Comprobar E13 en verde.</figcaption></figure></div><h3>Código: <code>E13Quiz.kt</code></h3><pre>package es.aula.futbol
+
+// Declara el objeto E13Quiz: aquí vive tu solución evaluable.
+object E13Quiz {
+ // Construye las preguntas del cuestionario a partir del catálogo.
+ // ENTRADA: rows = jugadores disponibles (ya mezclados por quien llama);
+ // count = cuántas preguntas se quieren.
+ // SALIDA: la lista de preguntas listas para jugar; error si el catálogo no da para tanto.
+ fun build(rows: List&lt;Player&gt;, count: Int): List&lt;Question&gt; {
+  require(count &gt; 0) { &quot;El número de preguntas debe ser positivo&quot; }
+  require(rows.map { it.id }.toSet().size == rows.size) { &quot;Hay IDs repetidos en el catálogo&quot; }
+  require(rows.size &gt;= count) { &quot;No hay jugadores suficientes para $count preguntas&quot; }
+  // Con un solo club no existe una segunda opción distinta.
+  val clubs = rows.map { it.club }.distinct()
+  require(clubs.size &gt;= 2) { &quot;Se necesitan al menos dos clubes&quot; }
+  // Cada pregunta usa un jugador distinto: rows ya llega mezclado, por tanto basta con tomar los primeros.
+  return rows.take(count).map { player -&gt;
+   // El distractor es el club de otro jugador; nunca coincide con la respuesta.
+   val other = clubs.filter { it != player.club }.random()
+   Question(player.id, &quot;¿En qué club juega ${player.name}?&quot;, listOf(player.club, other).shuffled(), player.club)
+  }
+ }
+ // demo() lo usa Academia: construye 5 preguntas con el catálogo inicial.
+ fun demo(): String = build(Seed.players,5).joinToString(&quot;\n&quot;) { it.text }
+}
+</pre></section><section class="ex"><h2>E14 · Diseñar y compartir cromo</h2><h3>Cinco líneas</h3><ol><li>Hemos implementado <code>title</code>: valida el color de 0 a 2 y un título de 1 a 28 caracteres, y devuelve el título recortado.</li><li>Punto delicado: el título se recorta antes de medir su longitud, por tanto los espacios no cuentan.</li><li>No hemos tocado <code>CardProvider</code>, porque ya es infraestructura.</li><li>Lo comprobamos con <code>E14Test</code>, con Comprobar E14 en verde y compartiendo el PNG hacia otra aplicación.</li><li>Resultado: título vacío rechazado, cromo visible y PNG abierto en otra app.</li></ol><h3>Capturas</h3><div class='caps'><figure><img src='capturas/43.png'><figcaption>Caso correcto: previsualización del cromo.</figcaption></figure><figure><img src='capturas/44.png'><figcaption>Compartir la imagen.</figcaption></figure><figure><img src='capturas/45.png'><figcaption>Otra aplicación abre el PNG.</figcaption></figure><figure><img src='capturas/47.png'><figcaption>Validación: título vacío rechazado.</figcaption></figure><figure><img src='capturas/46.png'><figcaption>Comprobar E14 en verde.</figcaption></figure></div><h3>Código: <code>E14Cromo.kt</code></h3><pre>package es.aula.futbol
+
+// Declara el objeto E14Cromo: aquí vive tu solución evaluable.
+object E14Cromo {
+ // Limpia y valida el título del cromo antes de dibujarlo.
+ // ENTRADA: raw = texto escrito por el alumno; color = 0 (azul), 1 (violeta) o 2 (verde).
+ // SALIDA: el título limpio; error si está vacío, es demasiado largo o el color no existe.
+ fun title(raw: String, color: Int): String {
+  // El color es un índice: 0 azul, 1 violeta, 2 verde.
+  require(color in 0..2) { &quot;El color debe ser 0, 1 o 2&quot; }
+  // Se recorta el título sin alterar su contenido y se exige de 1 a 28 caracteres.
+  val clean = raw.trim()
+  require(clean.length in 1..28) { &quot;El título debe tener entre 1 y 28 caracteres&quot; }
+  return clean
+ }
+ // demo() lo usa Academia: valida un título de ejemplo con el color violeta.
+ fun demo(): String = title(&quot;Mi jugador favorito&quot;,1)
+}
+</pre></section><section class="ex"><h2>E15 · Intercambio con confirmación</h2><h3>Cinco líneas</h3><ol><li>Hemos implementado <code>decode</code>: valida 8192 bytes UTF-8, versión 1, IDs enteros, lista no vacía, sin duplicados y conocidos.</li><li>Punto delicado: el tamaño se mide en bytes y no en caracteres, porque una <code>ñ</code> ocupa dos bytes.</li><li>Devuelve los IDs en el orden recibido.</li><li>Lo comprobamos con <code>E15Test</code> y con Comprobar E15 en verde.</li><li>No hemos podido probar el envío con ACK entre dos móviles, porque no disponíamos de un segundo dispositivo emparejado.</li></ol><h3>Capturas</h3><div class='caps'><figure><img src='capturas/48.png'><figcaption>Comprobar E15 en verde; la nota indica la prueba real pendiente.</figcaption></figure></div><h3>Código: <code>E15Bluetooth.kt</code></h3><pre>package es.aula.futbol
+
+import org.json.JSONObject
+
+// Declara el objeto E15Bluetooth: aquí vive tu solución evaluable.
+object E15Bluetooth {
+ // Decodifica y valida un mensaje de colección recibido por Bluetooth.
+ // ENTRADA: text = el mensaje JSON tal como llega; known = IDs conocidos aquí.
+ // SALIDA: la lista de IDs válidos; error si el mensaje no cumple el protocolo.
+ fun decode(text: String, known: Set&lt;Int&gt;): List&lt;Int&gt; {
+  // El tamaño se mide en bytes UTF-8, no en caracteres: una &quot;ñ&quot; ocupa dos.
+  require(text.toByteArray(Charsets.UTF_8).size &lt;= 8192) { &quot;Mensaje demasiado grande&quot; }
+  // Si el texto no es JSON, JSONObject lanza una excepción que el receptor captura y rechaza.
+  val root = JSONObject(text)
+  require(root.getInt(&quot;version&quot;) == 1) { &quot;Versión no admitida&quot; }
+  val array = root.getJSONArray(&quot;ids&quot;)
+  require(array.length() &gt; 0) { &quot;La lista de IDs está vacía&quot; }
+  // Cada elemento debe ser un entero real; &quot;1&quot; o 1.5 no valen.
+  val ids = (0 until array.length()).map { i -&gt;
+   val value = array.get(i)
+   require(value is Int) { &quot;El ID en la posición $i no es un entero&quot; }
+   value
+  }
+  require(ids.toSet().size == ids.size) { &quot;IDs repetidos&quot; }
+  require(known.containsAll(ids)) { &quot;Hay IDs desconocidos en este dispositivo&quot; }
+  // Se devuelven en el mismo orden en que llegaron.
+  return ids
+ }
+ // demo() lo usa Academia: decodifica un mensaje válido con los IDs 1 y 2.
+ fun demo(): String = decode(&quot;{\&quot;version\&quot;:1,\&quot;ids\&quot;:[1,2]}&quot;,setOf(1,2)).toString()
+}
+</pre></section><section class="ex"><h2>E16 · Panel de mi colección</h2><h3>Cinco líneas</h3><ol><li>Hemos implementado <code>counts</code>: elimina duplicados por ID y devuelve el recuento por club ordenado alfabéticamente.</li><li>Ampliación propia: <code>summary</code> indica el club más representado; está pendiente de acordar con el docente.</li><li>Con empate gana el primer club por orden alfabético, y sin favoritos devuelve un mensaje neutro.</li><li>Lo comprobamos con <code>E16Test</code>, con <code>E16AmpliacionTest</code> (3 pruebas) y en el panel con uno y con varios clubes.</li><li>No hemos hecho la captura del panel con cero favoritos; lo cubren los tests.</li></ol><h3>Capturas</h3><div class='caps'><figure><img src='capturas/49.png'><figcaption>Un solo club entre los favoritos.</figcaption></figure><figure><img src='capturas/50.png'><figcaption>Varios clubes, ordenados por nombre.</figcaption></figure></div><h3>Código: <code>E16Panel.kt</code></h3><pre>package es.aula.futbol
+
+// Declara el objeto E16Panel: aquí vive tu solución evaluable.
+object E16Panel {
+ // Cuenta jugadores por club para dibujar el panel personal.
+ // ENTRADA: rows = los jugadores elegidos (favoritos, normalmente).
+ // SALIDA: mapa con club y cuántos hay de ese club, ordenado alfabéticamente.
+ fun counts(rows: List&lt;Player&gt;): Map&lt;String, Int&gt; {
+  // Primero se quitan los duplicados por ID y después se cuenta por club.
+  val byClub = rows.distinctBy { it.id }.groupingBy { it.club }.eachCount()
+  // El mapa resultante conserva el orden alfabético por club (sin distinguir tildes ni mayúsculas).
+  return byClub.entries.sortedBy { TextKey.of(it.key) }.associate { it.key to it.value }
+ }
+ // AMPLIACIÓN PROPIA (pendiente de acordar con el docente): resumen del club más representado.
+ // Solo usa recuentos de la colección, no estadísticas deportivas. Si hay empate, gana el primero por orden alfabético.
+ // Sin jugadores devuelve un mensaje neutro en lugar de fallar.
+ fun summary(rows: List&lt;Player&gt;): String {
+  val top = counts(rows).entries.maxByOrNull { it.value } ?: return &quot;Aún no hay favoritos que resumir&quot;
+  return &quot;Club más representado en tu colección: ${top.key} (${top.value})&quot;
+ }
+ // demo() lo usa Academia: el recuento por club del catálogo inicial.
+ fun demo(): String = counts(Seed.players).toString()
+}
+</pre></section></body></html>
